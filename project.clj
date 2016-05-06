@@ -32,7 +32,8 @@
 
                  [clj-time "0.11.0"]
                  [clj-http "2.1.0"]
-                 [cheshire "5.6.1"]]
+                 [cheshire "5.6.1"]
+                 [jarohen/chime "0.1.9"]]
 
   :min-lein-version "2.0.0"
 

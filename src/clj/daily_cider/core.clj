@@ -1,8 +1,9 @@
 (ns daily-cider.core
   (:require [daily-cider.handler :as handler]
+            [daily-cider.config :refer [env]]
+            [daily-cider.processor :refer [scheduled-job]]
             [luminus.repl-server :as repl]
             [luminus.http-server :as http]
-            [daily-cider.config :refer [env]]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.tools.logging :as log]
             [luminus.logger :as logger]

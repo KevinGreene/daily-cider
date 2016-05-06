@@ -4,8 +4,11 @@
             [clojure.java.io :as io]
             [clojure.string :as s]
             [clj-time.core :as t]
+            [clj-time.periodic :refer [periodic-seq]]
             [clj-http.client :as client]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [mount.core :refer [defstate]]
+            [chime :refer [chime-at]]))
 
 (defonce shortcuts-array (atom []))
 
@@ -73,3 +76,16 @@
   (let [data (get-contents-of-github-folder cider-user cider-repo cider-path)
         matches   (mapcat #(re-seq regex %) data)]
     (reset! shortcuts-array (vec (map match->entry matches)))))
+
+(defn start-job-scheduler []
+  (load-shortcuts)
+  (chime-at (rest (periodic-seq (t/now)
+                                (-> 5 t/minutes)))
+            (fn [time]
+              (log/info (str "Starting job @ " time))
+              (load-shortcuts))))
+
+(defstate  ^{:on-reload :noop}
+  scheduled-job 
+  :start (start-job-scheduler)
+  :stop (scheduled-job))
