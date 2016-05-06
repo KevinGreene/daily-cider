@@ -17,13 +17,17 @@
 
 (defn home-page []
   [:div.container
-   [:h1.title "A Cider A Day Keeps the Refactor Away"]
-   (when-let [tip (session/get :tip)]
-     [:div.tips
-      [:div.col-lg-offset-2.col-lg-3.col-md-12
-       (for [kbd (get tip "kbd")]
-         [:h2 [:kbd kbd]])]
-      [:div.col-lg-5.col-md-12 [:h3 (get tip "description")]]])])
+   [:div {:style {:margin-top "100px"}}
+    [:h1.title "Daily Cider"]
+    (when-let [tip (session/get :tip)]
+      [:div.tips {:style {:text-align "center"
+                          :margin-top "50px"}}
+       [:div.col-md-12 
+        (for [kbd (get tip "kbd")]
+          [:h2 [:kbd kbd]])]
+       [:div.col-large-offset-4.col-large-4.col-md-offset-2.col-md-8
+        {:style {:margin-top "20px"}}
+        [:h3 (get tip "description")]]])]])
 
 (def pages
   {:home #'home-page
