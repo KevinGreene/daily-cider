@@ -3,7 +3,9 @@
             [luminus.logger :as logger]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [clj-time.core :as t]))
+            [clj-time.core :as t]
+            [clj-http.client :as client]
+            [cheshire.core :as json]))
 
 (defonce shortcuts-array (atom []))
 
@@ -43,7 +45,31 @@
                       second
                       s/trim)}))
 
+
+
+
+(def github-url "https://api.github.com/repos/")
+(def cider-user "clojure-emacs")
+(def cider-repo "cider")
+(def cider-path "doc")
+
+(defn get-contents-of-github-folder [owner repo folder]
+  (let [url (str github-url
+                 owner "/"
+                 repo "/"
+                 "contents/"
+                 folder)]
+    (-> url
+        client/get
+        :body
+        (json/parse-string true)
+        (->> (map :download_url)
+             (filter (complement nil?))
+             (map client/get)
+             (map :body)))))
+
+
 (defn load-shortcuts []
-  (let [test-data (slurp (io/file (io/resource "md/interactive_programming.md")))
-        matches   (re-seq regex test-data)]
+  (let [data (get-contents-of-github-folder cider-user cider-repo cider-path)
+        matches   (mapcat #(re-seq regex %) data)]
     (reset! shortcuts-array (vec (map match->entry matches)))))

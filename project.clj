@@ -29,8 +29,10 @@
                  [luminus-nrepl "0.1.4"]
                  [org.webjars/webjars-locator-jboss-vfs "0.1.0"]
                  [luminus-immutant "0.2.0"]
+
                  [clj-time "0.11.0"]
-]
+                 [clj-http "2.1.0"]
+                 [cheshire "5.6.1"]]
 
   :min-lein-version "2.0.0"
 
