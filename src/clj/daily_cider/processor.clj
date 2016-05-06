@@ -47,7 +47,3 @@
   (let [test-data (slurp (io/file (io/resource "md/interactive_programming.md")))
         matches   (re-seq regex test-data)]
     (reset! shortcuts-array (vec (map match->entry matches)))))
-
-
-
-

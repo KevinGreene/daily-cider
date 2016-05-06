@@ -5,7 +5,7 @@
             [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.webjars :refer [wrap-webjars]]
             [ring.middleware.format :refer [wrap-restful-format]]
-            [ring.middleware.json :refer [wrap-json-body]]
+            [ring.middleware.json :refer [wrap-json-response]]
             [daily-cider.config :refer [env]]
             [ring.middleware.flash :refer [wrap-flash]]
             [immutant.web.middleware :refer [wrap-session]]
@@ -56,7 +56,7 @@
 
 (defn wrap-api [handler]
   (-> handler
-      wrap-json-body))
+      wrap-json-response))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)

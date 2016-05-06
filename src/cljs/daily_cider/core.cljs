@@ -9,26 +9,6 @@
             [ajax.core :refer [GET POST]])
   (:import goog.History))
 
-(defn nav-link [uri title page collapsed?]
-  [:li.nav-item
-   {:class (when (= page (session/get :page)) "active")}
-   [:a.nav-link
-    {:href uri
-     :on-click #(reset! collapsed? true)} title]])
-
-(defn navbar []
-  (let [collapsed? (r/atom true)]
-    (fn []
-      [:nav.navbar.navbar-light.bg-faded
-       [:button.navbar-toggler.hidden-sm-up
-        {:on-click #(swap! collapsed? not)} "☰"]
-       [:div.collapse.navbar-toggleable-xs
-        (when-not @collapsed? {:class "in"})
-        [:a.navbar-brand {:href "#/"} "daily-cider"]
-        [:ul.nav.navbar-nav
-         [nav-link "#/" "Home" :home collapsed?]
-         [nav-link "#/about" "About" :about collapsed?]]]])))
-
 (defn about-page []
   [:div.container
    [:div.row
@@ -37,18 +17,13 @@
 
 (defn home-page []
   [:div.container
-   [:div.jumbotron
-    [:h1 "Welcome to daily-cider"]
-    [:p "Time to start building your site!"]
-    [:p [:a.btn.btn-primary.btn-lg {:href "http://luminusweb.net"} "Learn more »"]]]
-   [:div.row
-    [:div.col-md-12
-     [:h2 "Welcome to ClojureScript"]]]
-   (when-let [docs (session/get :docs)]
-     [:div.row
-      [:div.col-md-12
-       [:div {:dangerouslySetInnerHTML
-              {:__html (md->html docs)}}]]])])
+   [:h1.title "A Cider A Day Keeps the Refactor Away"]
+   (when-let [tip (session/get :tip)]
+     [:div.tips
+      [:div.col-lg-offset-2.col-lg-3.col-md-12
+       (for [kbd (get tip "kbd")]
+         [:h2 [:kbd kbd]])]
+      [:div.col-lg-5.col-md-12 [:h3 (get tip "description")]]])])
 
 (def pages
   {:home #'home-page
@@ -80,15 +55,15 @@
 
 ;; -------------------------
 ;; Initialize app
-(defn fetch-docs! []
-  (GET (str js/context "/docs") {:handler #(session/put! :docs %)}))
+
+(defn fetch-tip! []
+  (GET (str js/context "/cider/daily") {:handler #(session/put! :tip %)}))
 
 (defn mount-components []
-  (r/render [#'navbar] (.getElementById js/document "navbar"))
   (r/render [#'page] (.getElementById js/document "app")))
 
 (defn init! []
   (load-interceptors!)
-  (fetch-docs!)
+  (fetch-tip!)
   (hook-browser-navigation!)
   (mount-components))
