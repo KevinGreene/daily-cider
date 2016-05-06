@@ -80,7 +80,7 @@
 (defn start-job-scheduler []
   (load-shortcuts)
   (chime-at (rest (periodic-seq (t/now)
-                                (-> 5 t/minutes)))
+                                (-> 6 t/hours)))
             (fn [time]
               (log/info (str "Starting job @ " time))
               (load-shortcuts))))
