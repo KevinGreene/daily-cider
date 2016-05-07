@@ -36,7 +36,9 @@
         [:h3 (get tip "description")]]
        [:div.col-md-12
         [:a.btn.btn-primary.btn-lg {:on-click #(set-tip-type "random")} "Random"]
-        [:p (get-id-link (get tip "id"))]]])]])
+        (let [link (get-id-link (get tip "id"))]
+          [:div.col-md-12 {:style {:margin-top "10px"}}
+           [:p "Permalink:    " [:a {:href link} link]]])]])]])
 
 (def pages
   {:home #'home-page})
