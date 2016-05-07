@@ -12,6 +12,11 @@
 
 (defonce shortcuts-array (atom []))
 
+(defn get-nth-shortcut [n]
+  (let [index (mod n (count @shortcuts-array))]
+    (merge {:id index}
+           (nth @shortcuts-array index))))
+
 (defn day-of-year []
   (let [now (t/now)]
     (-> now
@@ -21,11 +26,10 @@
         (t/in-days))))
 
 (defn get-daily-shortcut []
-  (nth @shortcuts-array (-> (day-of-year)
-                            (mod (count @shortcuts-array)))))
+  (get-nth-shortcut (day-of-year)))
 
 (defn get-random-shortcut []
-  (rand-nth @shortcuts-array ))
+  (get-nth-shortcut (rand-int (count @shortcuts-array))))
 
 (def regex #"<kbd>.*\|.*\n")
 

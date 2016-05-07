@@ -9,11 +9,17 @@
             [ajax.core :refer [GET POST]])
   (:import goog.History))
 
-(defn about-page []
-  [:div.container
-   [:div.row
-    [:div.col-md-12
-     "this is the story of daily-cider... work in progress"]]])
+(defn fetch-tip! [type]
+  (GET (str js/context "/cider/" type)
+       {:handler #(session/put! :tip %)}))
+
+(defn set-tip-type [type]
+  (secretary/dispatch! type)
+  (aset js/window "location" (str "/#/" type)))
+
+(defn get-id-link [id]
+  (str  (.replace js/window.location.href (aget js/window.location "hash") "")
+        "#/" id))
 
 (defn home-page []
   [:div.container
@@ -27,11 +33,13 @@
           [:h2 [:kbd kbd]])]
        [:div.col-large-offset-4.col-large-4.col-md-offset-2.col-md-8
         {:style {:margin-top "20px"}}
-        [:h3 (get tip "description")]]])]])
+        [:h3 (get tip "description")]]
+       [:div.col-md-12
+        [:a.btn.btn-primary.btn-lg {:on-click #(set-tip-type "random")} "Random"]
+        [:p (get-id-link (get tip "id"))]]])]])
 
 (def pages
-  {:home #'home-page
-   :about #'about-page})
+  {:home #'home-page})
 
 (defn page []
   [(pages (session/get :page))])
@@ -43,8 +51,13 @@
 (secretary/defroute "/" []
   (session/put! :page :home))
 
-(secretary/defroute "/about" []
-  (session/put! :page :about))
+(secretary/defroute "/random" []
+  (session/put! :page :home)
+  (fetch-tip! "random"))
+
+(secretary/defroute "/:id" [id]
+  (session/put! :page :home)
+  (fetch-tip! id))
 
 ;; -------------------------
 ;; History
@@ -60,14 +73,11 @@
 ;; -------------------------
 ;; Initialize app
 
-(defn fetch-tip! []
-  (GET (str js/context "/cider/daily") {:handler #(session/put! :tip %)}))
-
 (defn mount-components []
   (r/render [#'page] (.getElementById js/document "app")))
 
 (defn init! []
   (load-interceptors!)
-  (fetch-tip!)
+  (fetch-tip! "daily")
   (hook-browser-navigation!)
   (mount-components))
