@@ -21,6 +21,10 @@
   (str  (.replace js/window.location.href (aget js/window.location "hash") "")
         "#/" id))
 
+(defn copy-element [id]
+  (.select (.getElementById js/document id))
+  (.execCommand js/document "copy"))
+
 (defn home-page []
   [:div.container
    [:div {:style {:margin-top "100px"}}
@@ -38,7 +42,17 @@
         [:a.btn.btn-primary.btn-lg {:on-click #(set-tip-type "random")} "Random"]
         (let [link (get-id-link (get tip "id"))]
           [:div.col-md-12 {:style {:margin-top "10px"}}
-           [:p "Permalink:    " [:a {:href link} link]]])]])]])
+           [:div "Permalink:    "
+            [:div.input-group
+             [:span.input-group-btn
+              [:button.btn.btn-default {:type "button"
+                                        :id "permalink-addon"
+                                        :on-click #(copy-element "permalink-input")} "Copy"]]
+             [:input.form-control {:aria-describedby "permalink-addon"
+                                   :id "permalink-input"
+                                   :type "text"
+                                   :value link
+                                   :readOnly true}]]]])]])]])
 
 (def pages
   {:home #'home-page})
