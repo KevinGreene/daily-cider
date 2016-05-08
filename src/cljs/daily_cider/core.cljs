@@ -10,15 +10,11 @@
   (:import goog.History))
 
 (defn fetch-tip! [type]
-  (js/console.log type)
   (when (not= type (str (get (session/get :tip) "id")))
     (GET (str js/context "/cider/" type)
          {:handler #(do (session/put! :tip %)
-                        (aset js/window "location" (str "/#/" (get % "id"))))})))
-
-(defn set-tip-type [type]
-  (secretary/dispatch! type)
-  )
+                        (when (not= type "daily")
+                          (aset js/window "location" (str "/#/" (get % "id")))))})))
 
 (defn get-id-link [id]
   (str  (.replace js/window.location.href (aget js/window.location "hash") "")
@@ -42,7 +38,7 @@
         {:style {:margin-top "20px"}}
         [:h3 (get tip "description")]]
        [:div.col-md-12
-        [:a.btn.btn-primary.btn-lg {:on-click #(set-tip-type "random")} "Random"]
+        [:a.btn.btn-primary.btn-lg {:on-click #(secretary/dispatch! "random")} "Random"]
         (let [link (get-id-link (get tip "id"))]
           [:div.col-md-12 {:style {:margin-top "10px"}}
            [:div "Permalink:    "
@@ -57,25 +53,17 @@
                                    :value link
                                    :readOnly true}]]]])]])]])
 
-(def pages
-  {:home #'home-page})
-
-(defn page []
-  [(pages (session/get :page))])
-
 ;; -------------------------
 ;; Routes
 (secretary/set-config! :prefix "#")
 
 (secretary/defroute "/" []
-  (session/put! :page :home))
+  (fetch-tip! "daily"))
 
 (secretary/defroute "/random" []
-  (session/put! :page :home)
   (fetch-tip! "random"))
 
 (secretary/defroute "/:id" [id]
-  (session/put! :page :home)
   (fetch-tip! id))
 
 ;; -------------------------
@@ -93,7 +81,7 @@
 ;; Initialize app
 
 (defn mount-components []
-  (r/render [#'page] (.getElementById js/document "app")))
+  (r/render [#'home-page] (.getElementById js/document "app")))
 
 (defn init! []
   (load-interceptors!)
