@@ -11,13 +11,14 @@
 
 (defn fetch-tip! [type]
   (js/console.log type)
-  (GET (str js/context "/cider/" type)
-       {:handler #(do (session/put! :tip %)
-                      (when (= "random" type)
-                        (aset js/window "location" (str "/#/" (get % "id")))))}))
+  (when (not= type (str (get (session/get :tip) "id")))
+    (GET (str js/context "/cider/" type)
+         {:handler #(do (session/put! :tip %)
+                        (aset js/window "location" (str "/#/" (get % "id"))))})))
 
 (defn set-tip-type [type]
-  (secretary/dispatch! type))
+  (secretary/dispatch! type)
+  )
 
 (defn get-id-link [id]
   (str  (.replace js/window.location.href (aget js/window.location "hash") "")
@@ -80,7 +81,13 @@
 ;; -------------------------
 ;; History
 ;; must be called after routes have been defined
-
+(defn hook-browser-navigation! []
+  (doto (History.)
+        (events/listen
+          HistoryEventType/NAVIGATE
+          (fn [event]
+              (secretary/dispatch! (.-token event))))
+        (.setEnabled true)))
 
 ;; -------------------------
 ;; Initialize app
@@ -90,7 +97,6 @@
 
 (defn init! []
   (load-interceptors!)
-  (session/put! :page :home)
   (fetch-tip! "daily")
-  
+  (hook-browser-navigation!)
   (mount-components))
